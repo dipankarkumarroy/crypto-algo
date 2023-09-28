@@ -120,7 +120,7 @@
         }
 
         function caesarDecipher(text, shift) {
-            shift=0-shift;
+            shift=10+shift;
             let result = "";
             for (let i = 0; i < text.length; i++) {
                 let char = text.charAt(i);
