@@ -120,7 +120,6 @@
         }
 
         function caesarDecipher(text, shift) {
-            shift=10+shift;
             let result = "";
             for (let i = 0; i < text.length; i++) {
                 let char = text.charAt(i);
@@ -128,10 +127,10 @@
                     let code = text.charCodeAt(i);
                     let isUpperCase = char.match(/[A-Z]/);
                     let offset = isUpperCase ? 65 : 97;
-                    char = String.fromCharCode(((code - offset + shift) % 26) + offset);
+                    char = String.fromCharCode(((code - offset - shift) % 26) + offset);
                 } else if (char.match(/[0-9]/)) {
                     let digit = parseInt(char);
-                    digit = (digit + shift) % 10;
+                    digit = (digit - shift) % 10;
                     char = digit.toString();
                 }
                 result += char;
