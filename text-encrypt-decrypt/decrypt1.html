@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Decryption App</title>
+    <style>
+        /* Add your CSS styles here */
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        input[readonly] {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Style for the substitution map input */
+        .substitution-map {
+            display: block;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Text Decryption App</h1>
+    <label for="inputText">Enter Encrypted Text:</label>
+    <input type="text" id="inputText" placeholder="Enter encrypted text to decrypt">
+    
+    <label for="decryptionSelect">Select Algorithm:</label>
+    <select id="decryptionSelect">
+        <option value="caesar">Caesar Cipher</option>
+        <option value="substitution">Substitution Cipher</option>
+    </select>
+
+    <!-- Input for Caesar Cipher shift value -->
+    <div id="shiftInput" style="display: none;">
+        <label for="shiftValue">Shift Value:</label>
+        <input type="number" id="shiftValue" placeholder="Enter shift value">
+    </div>
+
+    <!-- Input for Substitution Cipher substitutionMap -->
+    <div id="substitutionInput" style="display: none;">
+        <label for="substitutionMap">Substitution Map:</label>
+        <input type="text" id="substitutionMap" placeholder="e.g., a=x, b=y">
+        <button onclick="addSubstitution()">Add Substitution</button>
+    </div>
+    
+    <button onclick="decryptText()">Decrypt</button>
+    
+    <p><strong>Decrypted Text:</strong></p>
+    <input type="text" id="decryptedOutput" readonly>
+
+    <script>
+        function toggleInputFields() {
+            const algorithm = document.getElementById("decryptionSelect").value;
+            const shiftInput = document.getElementById("shiftInput");
+            const substitutionInput = document.getElementById("substitutionInput");
+
+            if (algorithm === "caesar") {
+                shiftInput.style.display = "block";
+                substitutionInput.style.display = "none";
+            } else if (algorithm === "substitution") {
+                shiftInput.style.display = "none";
+                substitutionInput.style.display = "block";
+            }
+        }
+
+        function decryptText() {
+            const encryptedText = document.getElementById("inputText").value;
+            const algorithm = document.getElementById("decryptionSelect").value;
+            let decryptedText = '';
+
+            if (algorithm === "caesar") {
+                const shift = parseInt(document.getElementById("shiftValue").value) || 0;
+                decryptedText = caesarDecipher(encryptedText, shift);
+            } else if (algorithm === "substitution") {
+                const substitutionMap = parseSubstitutionMap(document.getElementById("substitutionMap").value);
+                decryptedText = substitutionDecipher(encryptedText, substitutionMap);
+            }
+
+            document.getElementById("decryptedOutput").value = decryptedText;
+        }
+
+        function caesarCipher(text, shift) {
+            shift=0-shift;
+            let result = "";
+            for (let i = 0; i < text.length; i++) {
+                let char = text.charAt(i);
+                if (char.match(/[a-z]/i)) {
+                    let code = text.charCodeAt(i);
+                    let isUpperCase = char.match(/[A-Z]/);
+                    let offset = isUpperCase ? 65 : 97;
+                    char = String.fromCharCode(((code - offset + shift) % 26) + offset);
+                } else if (char.match(/[0-9]/)) {
+                    let digit = parseInt(char);
+                    digit = (digit + shift) % 10;
+                    char = digit.toString();
+                }
+                result += char;
+            }
+            return result;
+        }
+
+        function substitutionDecipher(text, substitutionMap) {
+            let result = "";
+            for (let i = 0; i < text.length; i++) {
+                let char = text.charAt(i);
+                if (char in substitutionMap) {
+                    result += substitutionMap[char];
+                } else {
+                    result += char;
+                }
+            }
+            return result;
+        }
+
+        function parseSubstitutionMap(mapString) {
+            const mapEntries = mapString.split(',');
+            const substitutionMap = {};
+
+            for (const entry of mapEntries) {
+                const [from, to] = entry.split('=').map(item => item.trim());
+                if (from && to) {
+                    substitutionMap[to] = from;
+                }
+            }
+
+            return substitutionMap;
+        }
+
+        function addSubstitution() {
+            const substitutionMapInput = document.getElementById("substitutionMap");
+            substitutionMapInput.value += ", ";
+        }
+
+        // Toggle input fields based on the selected algorithm
+        document.getElementById("decryptionSelect").addEventListener("change", toggleInputFields);
+        toggleInputFields(); // Initialize input field visibility
+    </script>
+</body>
+</html>
